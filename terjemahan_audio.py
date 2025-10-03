@@ -1,6 +1,6 @@
 import streamlit as st
 import librosa
-import numpy as ncp
+import numpy as np
 import random
 
 # --- KONFIGURASI DAN KAMUS DATA ---
