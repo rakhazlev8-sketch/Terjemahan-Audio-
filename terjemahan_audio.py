@@ -6,7 +6,7 @@ import os
 import time
 
 # --- KONFIGURASI ---
-CONFIDENCE_THRESHOLD = 0.5 # Ambang batas kepercayaan (50%). Jika di bawah ini, fallback akan aktif.
+CONFIDENCE_THRESHOLD = 0.5 # Ambang batas kepercayaan (50%).
 
 # --- KAMUS DATA 1 & 2 ---
 KALIMAT_MAP = {
@@ -42,11 +42,9 @@ SASTRAWI_WORD_MAP = {
     "Hirup": "Life/Alive", "Paeh": "Dead", "Caang": "Bright/Light", "Poek": "Dark"
 }
 
-
 # --- KUMPULAN FUNGSI UTAMA ---
 
 def extract_mfcc(audio_file, max_pad_len=174):
-    # Fungsi ini tidak berubah
     try:
         audio, sample_rate = librosa.load(audio_file, sr=None)
         mfccs = librosa.feature.mfcc(y=audio, sr=sample_rate, n_mfcc=40)
@@ -60,14 +58,12 @@ def extract_mfcc(audio_file, max_pad_len=174):
         st.error(f"Gagal memproses file audio: {e}")
         return None
 
-# DIUBAH: Fungsi simulasi sekarang mengembalikan hasil dan skor kepercayaan acak
 def simulate_audio_prediction(target_list):
     predicted_item = random.choice(target_list)
-    confidence = random.random()  # Menghasilkan angka acak antara 0.0 dan 1.0
+    confidence = random.random()
     return predicted_item, confidence
 
 def predict_from_filename(filename):
-    # Fungsi ini tidak berubah
     base_name = os.path.splitext(filename)[0]
     # Mengganti spasi dengan underscore untuk file kalimat, lalu split
     parts = base_name.replace(" ", "_").split('_')
@@ -91,14 +87,12 @@ def predict_from_filename(filename):
             
     return keyword
 
-
 # --- TAMPILAN ANTARMUKA (UI) STREAMLIT ---
 
 st.set_page_config(page_title="Penerjemah Suara Sunda", layout="centered")
 st.title("🎤 Penerjemah Suara Sunda ke Inggris")
 st.markdown("---")
 
-# Pilihan Mode Deteksi (Kata atau Kalimat)
 app_mode = st.radio(
     "Pilih Mode Deteksi:",
     ("Deteksi Kalimat Umum", "Deteksi Kata Sastrawi"),
@@ -106,66 +100,5 @@ app_mode = st.radio(
 )
 st.markdown("---")
 
-# DIHAPUS: Pilihan metode prediksi dihapus dari UI
-
-# Logika untuk menentukan kamus dan tipe item
 if app_mode == "Deteksi Kalimat Umum":
-    TARGET_MAP = KALIMAT_MAP
-    TARGET_LIST = list(KALIMAT_MAP.keys())
-    item_type = "Kalimat"
-    instruction_item = "satu kalimat"
-else:
-    TARGET_MAP = SASTRAWI_WORD_MAP
-    TARGET_LIST = list(SASTRAWI_WORD_MAP.keys())
-    item_type = "Kata"
-    instruction_item = "satu kata"
-
-st.info(
-    f"**Mode Aktif:** `{app_mode}`\n\n"
-    f"**Cara Penggunaan:**\n"
-    f"1. Unggah file audio `.wav` berisi **{instruction_item}** Sunda.\n"
-    f"2. Aplikasi akan mencoba deteksi dari audio, jika gagal, akan menebak dari nama file."
-)
-
-uploaded_file = st.file_uploader("Pilih file audio (.wav)", type=["wav"])
-
-if uploaded_file is not None:
-    st.markdown(f"**Nama File:** `{uploaded_file.name}`")
-    st.audio(uploaded_file, format='audio/wav')
-    st.markdown("---")
-
-    if st.button(f"Jalankan Prediksi ({item_type})", use_container_width=True):
-        recognized_item = None
-        
-        # --- LOGIKA FALLBACK OTOMATIS ---
-        with st.spinner("Mencoba deteksi dari audio... 🔊"):
-            time.sleep(1) # Memberi jeda agar user bisa membaca status
-            mfcc_features = extract_mfcc(uploaded_file)
-            
-            if mfcc_features is not None:
-                # 1. Selalu coba prediksi dari audio terlebih dahulu
-                predicted_item, confidence = simulate_audio_prediction(TARGET_LIST)
-                
-                # 2. Cek skor kepercayaan
-                if confidence < CONFIDENCE_THRESHOLD:
-                    st.warning(f"Deteksi dari audio kurang meyakinkan (skor: {confidence:.0%}). Mencoba tebak dari nama file...", icon="💡")
-                    time.sleep(2) # Jeda agar pesan terbaca
-                    recognized_item = predict_from_filename(uploaded_file.name)
-                else:
-                    st.success(f"Deteksi dari audio cukup meyakinkan (skor: {confidence:.0%})", icon="✅")
-                    recognized_item = predicted_item
-            else:
-                # Jika MFCC gagal, langsung fallback
-                st.warning("Gagal memproses audio. Mencoba tebak dari nama file...", icon="💡")
-                time.sleep(2)
-                recognized_item = predict_from_filename(uploaded_file.name)
-        
-        # --- Menampilkan Hasil ---
-        if recognized_item:
-            translation = TARGET_MAP.get(recognized_item, f"{item_type} '{recognized_item}' tidak ada dalam kamus.")
-            st.subheader("Hasil Prediksi")
-            col1, col2 = st.columns(2)
-            with col1:
-                st.metric(label=f"{item_type} Dikenali (Sunda)", value=recognized_item)
-            with col2:
-                st.metric(label="Terjemahan (Inggris)", value=translation)
+    TARGET_
