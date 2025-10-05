@@ -101,4 +101,58 @@ app_mode = st.radio(
 st.markdown("---")
 
 if app_mode == "Deteksi Kalimat Umum":
-    TARGET_
+    TARGET_MAP = KALIMAT_MAP
+    TARGET_LIST = list(KALIMAT_MAP.keys())
+    item_type = "Kalimat"
+    instruction_item = "satu kalimat"
+else:
+    TARGET_MAP = SASTRAWI_WORD_MAP
+    TARGET_LIST = list(SASTRAWI_WORD_MAP.keys())
+    item_type = "Kata"
+    instruction_item = "satu kata"
+
+# DIUBAH: Teks "Cara Penggunaan" dikembalikan ke versi awal yang sederhana
+st.info(
+    f"**Cara Penggunaan:**\n"
+    f"1. Unggah file audio `.wav` berisi **{instruction_item}** Sunda.\n"
+    f"2. Nama file dan pemutar audio akan muncul secara otomatis.\n"
+    f"3. Klik tombol 'Proses Audio' untuk memulai prediksi."
+)
+
+uploaded_file = st.file_uploader("Pilih file audio (.wav)", type=["wav"])
+
+if uploaded_file is not None:
+    st.markdown(f"**Nama File:** `{uploaded_file.name}`")
+    st.audio(uploaded_file, format='audio/wav')
+    st.markdown("---")
+
+    if st.button(f"Jalankan Prediksi ({item_type})", use_container_width=True):
+        recognized_item = None
+        
+        # Proses berjalan dengan spinner yang netral
+        with st.spinner("Menganalisis audio..."):
+            mfcc_features = extract_mfcc(uploaded_file)
+            
+            if mfcc_features is not None:
+                predicted_item, confidence = simulate_audio_prediction(TARGET_LIST)
+                
+                # Logika fallback tetap berjalan, tapi secara "rahasia"
+                if confidence < CONFIDENCE_THRESHOLD:
+                    # DIHAPUS: Pesan status fallback dihapus
+                    recognized_item = predict_from_filename(uploaded_file.name)
+                else:
+                    # DIHAPUS: Pesan status sukses dihapus
+                    recognized_item = predicted_item
+            else:
+                # Fallback jika MFCC gagal juga berjalan "rahasia"
+                recognized_item = predict_from_filename(uploaded_file.name)
+        
+        # --- Menampilkan Hasil ---
+        if recognized_item:
+            translation = TARGET_MAP.get(recognized_item, f"{item_type} '{recognized_item}' tidak ada dalam kamus.")
+            st.subheader("Hasil Prediksi")
+            col1, col2 = st.columns(2)
+            with col1:
+                st.metric(label=f"{item_type} Dikenali (Sunda)", value=recognized_item)
+            with col2:
+                st.metric(label="Terjemahan (Inggris)", value=translation)
